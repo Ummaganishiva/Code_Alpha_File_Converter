@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+            color: #333;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            background-color: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .drop-zone.highlight {
+            border-color: #008000;
+        }
+
+        #image-preview {
+            max-width: 500px;
+            max-height: 500px;
+            display: block;
+            margin: 30px auto;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .custom-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #008000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .custom-button:hover {
+            background-color: #006600;
+        }
+
+        .convert-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #008000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .convert-button:hover {
+            background-color: #006600;
+        }
+
+        .download-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #008000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+        }
+
+        .download-button:hover {
+            background-color: #006600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Converter</h1>
+    <div class="drop-zone" id="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)">
+        <p>Drag and drop an image file here</p>
+        <p>or</p>
+        <label for="image-input" class="custom-button">Choose File</label>
+        <input type="file" id="image-input" accept="image/*" class="file-input" onchange="handleFiles(event)">
+    </div>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <br>
+    <div>
+        <button class="convert-button" onclick="convertTo('jpeg')">Convert to JPG</button>
+        <button class="convert-button" onclick="convertTo('png')">Convert to PNG</button>
+    </div>
+    <br>
+    <img id="image-preview">
+    <br>
+    <a id="download-link" style="display: none;" download="converted_image">
+        <button class="download-button">Download Image</button>
+    </a>
+    <script>
+        function handleFiles(event) {
+            var fileInput = document.getElementById('image-input');
+            var files = event.target.files || event.dataTransfer.files;
+            fileInput.files = files;
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            handleFiles(event);
+            document.getElementById('drop-zone').classList.remove('highlight');
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+        }
+
+        function handleDragEnter(event) {
+            event.preventDefault();
+            document.getElementById('drop-zone').classList.add('highlight');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            document.getElementById('drop-zone').classList.remove('highlight');
+        }
+
+        function convertTo(format) {
+            var canvas = document.getElementById('canvas');
+            var imagePreview = document.getElementById('image-preview');
+            var fileInput = document.getElementById('image-input');
+            var downloadLink = document.getElementById('download-link');
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var image = new Image();
+                image.src = e.target.result;
+
+                image.onload = function () {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    var context = canvas.getContext('2d');
+                    context.drawImage(image, 0, 0);
+
+                    var dataUrl;
+                    var fileName;
+                    
+                    if (format === 'jpeg') {
+                        dataUrl = canvas.toDataURL('image/jpeg');
+                        fileName = 'converted_image.jpg';
+                    } else if (format === 'png') {
+                        dataUrl = canvas.toDataURL('image/png');
+                        fileName = 'converted_image.png';
+                    }
+                    
+                    imagePreview.src = dataUrl;
+
+                    downloadLink.href = dataUrl;
+                    downloadLink.download = fileName;
+                    downloadLink.style.display = 'block';
+                    document.getElementsByClassName('download-button')[0].style.display = 'block';
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
